@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LinkVault Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+
+  <div class="page">
+    <div class="page-header">
+      <div class="brand">
+        <span class="brand-icon">🔗</span>
+        <div>
+          <h1>LinkVault Settings</h1>
+          <p class="brand-sub">Configure AI, manage data, and customise your experience</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── AI SECTION ───────────────────────────────────────── -->
+    <section class="card">
+      <div class="card-head">
+        <span class="card-icon">🤖</span>
+        <div>
+          <h2>AI Configuration</h2>
+          <p class="card-desc">Power the smart summaries with your own API key — stays 100 % on your device</p>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="aiProvider">AI Provider</label>
+          <select id="aiProvider">
+            <option value="openai">OpenAI  (GPT)</option>
+            <option value="gemini">Google  Gemini</option>
+          </select>
+        </div>
+
+        <div class="field" id="modelField">
+          <label for="aiModel">Model</label>
+          <select id="aiModel">
+            <option value="gpt-3.5-turbo">GPT-3.5 Turbo — fast &amp; affordable</option>
+            <option value="gpt-4o-mini">GPT-4o Mini — better quality</option>
+            <option value="gpt-4o">GPT-4o — best quality</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="apiKey">API Key</label>
+        <div class="key-row">
+          <input type="password" id="apiKey" placeholder="sk-…  or  AIza…" autocomplete="off" spellcheck="false">
+          <button class="eye-btn" id="eyeBtn" title="Show / hide">👁</button>
+        </div>
+        <p class="hint">Your key is stored locally and only sent directly to the AI provider — never to us.</p>
+      </div>
+
+      <div class="test-row">
+        <button class="btn-outline" id="testBtn">Test Connection</button>
+        <div class="test-result hidden" id="testResult"></div>
+      </div>
+    </section>
+
+    <!-- ── DATA SECTION ──────────────────────────────────────── -->
+    <section class="card">
+      <div class="card-head">
+        <span class="card-icon">📊</span>
+        <div>
+          <h2>Data Management</h2>
+          <p class="card-desc">Export, import or clear your saved resources</p>
+        </div>
+      </div>
+
+      <div class="stats-box" id="statsBox">Loading stats…</div>
+
+      <div class="action-row">
+        <button class="btn-outline" id="exportBtn">📤 Export JSON</button>
+        <button class="btn-outline" id="importBtn">📥 Import JSON</button>
+        <input type="file" id="importFile" accept=".json" class="hidden">
+        <button class="btn-danger-outline" id="clearBtn">🗑️ Clear All Data</button>
+      </div>
+    </section>
+
+    <!-- ── HOW TO GET API KEYS ───────────────────────────────── -->
+    <section class="card">
+      <div class="card-head">
+        <span class="card-icon">📖</span>
+        <div>
+          <h2>How to Get an API Key</h2>
+          <p class="card-desc">Quick steps for each provider</p>
+        </div>
+      </div>
+
+      <div class="guide-grid">
+        <div class="guide-block">
+          <h3>🟢 OpenAI</h3>
+          <ol>
+            <li>Visit <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com/api-keys</a></li>
+            <li>Click <strong>Create new secret key</strong></li>
+            <li>Copy &amp; paste it above</li>
+          </ol>
+          <p class="guide-note">GPT-3.5 Turbo ≈ $0.002 per summary</p>
+        </div>
+
+        <div class="guide-block">
+          <h3>🔵 Google Gemini</h3>
+          <ol>
+            <li>Visit <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a></li>
+            <li>Click <strong>Get API key → Create API key</strong></li>
+            <li>Copy &amp; paste it above</li>
+          </ol>
+          <p class="guide-note">Gemini 1.5 Flash has a generous free tier</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SAVE ──────────────────────────────────────────────── -->
+    <div class="save-row">
+      <button class="btn-primary" id="saveBtn">Save Settings</button>
+      <span class="save-msg hidden" id="saveMsg">✅ Saved!</span>
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

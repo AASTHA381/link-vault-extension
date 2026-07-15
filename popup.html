@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LinkVault</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+
+  <!-- ── HEADER ─────────────────────────────────────────────── -->
+  <div class="header">
+    <div class="logo">
+      <span class="logo-icon">🔗</span>
+      <span class="logo-text">LinkVault</span>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="searchToggleBtn" title="Search">🔍</button>
+      <button class="icon-btn" id="addCurrentPageBtn" title="Save current tab">⬆️</button>
+      <button class="icon-btn" id="settingsBtn" title="Settings">⚙️</button>
+    </div>
+  </div>
+
+  <!-- ── SEARCH BAR ─────────────────────────────────────────── -->
+  <div class="search-bar hidden" id="searchBar">
+    <input type="text" id="searchInput" placeholder="Search your resources…" autocomplete="off" spellcheck="false">
+    <button class="search-clear" id="searchClearBtn">✕</button>
+  </div>
+
+  <!-- ── CURRENT TAB QUICK-SAVE BANNER ─────────────────────── -->
+  <div class="quick-bar hidden" id="quickBar">
+    <div class="quick-bar-info">
+      <span class="quick-bar-icon">🌐</span>
+      <span class="quick-bar-title" id="quickBarTitle">Current page</span>
+    </div>
+    <button class="quick-save-btn" id="quickSaveBtn">Save Page</button>
+  </div>
+
+  <!-- ── CATEGORY TABS ──────────────────────────────────────── -->
+  <div class="category-tabs" id="categoryTabs">
+    <button class="cat-tab active" data-cat="all">All <span class="cnt" id="cnt-all">0</span></button>
+    <button class="cat-tab" data-cat="studies">📚 Studies <span class="cnt" id="cnt-studies">0</span></button>
+    <button class="cat-tab" data-cat="personal">👤 Personal <span class="cnt" id="cnt-personal">0</span></button>
+    <button class="cat-tab" data-cat="shopping">🛍️ Shopping <span class="cnt" id="cnt-shopping">0</span></button>
+    <button class="cat-tab" data-cat="college">🎓 College <span class="cnt" id="cnt-college">0</span></button>
+    <button class="cat-tab" data-cat="pm">📋 PM Tasks <span class="cnt" id="cnt-pm">0</span></button>
+    <button class="cat-tab" data-cat="important">📄 Imp. Docs <span class="cnt" id="cnt-important">0</span></button>
+  </div>
+
+  <!-- ── ITEMS AREA ──────────────────────────────────────────── -->
+  <!-- emptyState MUST live outside itemsScroll so innerHTML='' never destroys it -->
+  <div class="items-area">
+    <div class="empty-state" id="emptyState">
+      <div class="empty-emoji">🗂️</div>
+      <p class="empty-heading">Nothing saved yet</p>
+      <p class="empty-sub">Hit <strong>+</strong> to save your first link or file</p>
+    </div>
+    <div class="items-scroll hidden" id="itemsScroll"></div>
+  </div>
+
+  <!-- ── FAB ───────────────────────────────────────────────── -->
+  <button class="fab" id="fabBtn" title="Add resource">+</button>
+
+  <!-- ════════════════════════════════════════════════════════
+       ADD MODAL
+  ══════════════════════════════════════════════════════════ -->
+  <div class="backdrop hidden" id="addModal">
+    <div class="modal">
+
+      <div class="modal-header">
+        <span class="modal-title">Add Resource</span>
+        <button class="modal-close" id="closeAddModal">✕</button>
+      </div>
+
+      <!-- Link / File tabs -->
+      <div class="type-tabs">
+        <button class="type-tab active" data-type="link">🔗 Link / URL</button>
+        <button class="type-tab" data-type="file">📎 File / PDF</button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- Link panel -->
+        <div id="linkPanel">
+          <div class="field">
+            <label>URL *</label>
+            <div class="row-input">
+              <input type="url" id="urlInput" placeholder="https://…">
+              <button class="fetch-btn" id="fetchUrlBtn">Fetch</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Title</label>
+            <input type="text" id="linkTitleInput" placeholder="Auto-fetched from URL">
+          </div>
+        </div>
+
+        <!-- File panel -->
+        <div id="filePanel" class="hidden">
+          <div class="field">
+            <label>Upload File</label>
+            <div class="drop-zone" id="dropZone">
+              <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt,.md" class="hidden">
+              <div class="drop-idle" id="dropIdle">
+                <span class="drop-emoji">📎</span>
+                <p>Click or drag &amp; drop</p>
+                <small>PDF · DOC · DOCX · TXT · MD</small>
+              </div>
+              <div class="drop-chosen hidden" id="dropChosen">
+                <span class="drop-file-icon">📄</span>
+                <div class="drop-file-meta">
+                  <span class="drop-file-name" id="chosenName">file.pdf</span>
+                  <span class="drop-file-size" id="chosenSize">0 KB</span>
+                </div>
+                <button class="remove-file" id="removeFileBtn">✕</button>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Title</label>
+            <input type="text" id="fileTitleInput" placeholder="Document title">
+          </div>
+        </div>
+
+        <!-- Shared fields -->
+        <div class="field">
+          <label>Category *</label>
+          <select id="categorySelect">
+            <option value="studies">📚 Studies / Learning</option>
+            <option value="personal">👤 Personal</option>
+            <option value="shopping">🛍️ Shopping</option>
+            <option value="college">🎓 College Tasks</option>
+            <option value="pm">📋 PM Tasks</option>
+            <option value="important">📄 Important Docs</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Notes <span class="optional">(optional)</span></label>
+          <textarea id="notesInput" rows="2" placeholder="What is this about? Add context…"></textarea>
+        </div>
+
+        <div class="ai-toggle-row">
+          <label class="toggle-label" for="aiToggle">
+            <div class="toggle-wrap">
+              <input type="checkbox" id="aiToggle" checked>
+              <div class="toggle-track">
+                <div class="toggle-thumb"></div>
+              </div>
+            </div>
+            <span>Generate AI Summary</span>
+          </label>
+          <span class="ai-badge">✨ AI</span>
+        </div>
+
+      </div><!-- /modal-body -->
+
+      <div class="modal-footer">
+        <button class="btn-ghost" id="cancelAddBtn">Cancel</button>
+        <button class="btn-primary" id="saveResourceBtn">
+          <span id="saveBtnLabel">Save Resource</span>
+          <span class="spinner hidden" id="saveSpinner">⟳</span>
+        </button>
+      </div>
+
+    </div><!-- /modal -->
+  </div><!-- /addModal -->
+
+  <!-- ════════════════════════════════════════════════════════
+       VIEW MODAL
+  ══════════════════════════════════════════════════════════ -->
+  <div class="backdrop hidden" id="viewModal">
+    <div class="modal modal-view">
+
+      <div class="modal-header">
+        <span class="modal-title ellipsis" id="viewItemTitle">Resource</span>
+        <button class="modal-close" id="closeViewModal">✕</button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="view-meta" id="viewMeta"></div>
+
+        <!-- AI Summary card -->
+        <div class="summary-card">
+          <div class="summary-card-head">
+            <span class="summary-card-label">✨ AI Summary</span>
+            <button class="regen-btn" id="regenBtn">↻ Regenerate</button>
+          </div>
+          <div class="summary-content">
+            <div class="generating hidden" id="generatingMsg">✨ Generating summary…</div>
+            <div class="summary-text" id="summaryDisplay"></div>
+          </div>
+        </div>
+
+        <!-- Notes card -->
+        <div class="notes-card hidden" id="notesCard">
+          <div class="notes-card-head">📝 Your Notes</div>
+          <div class="notes-text" id="notesDisplay"></div>
+        </div>
+
+      </div><!-- /modal-body -->
+
+      <div class="modal-footer">
+        <button class="btn-danger" id="deleteBtn">🗑️ Delete</button>
+        <div class="footer-right">
+          <button class="btn-ghost hidden" id="openLinkBtn">↗️ Open Link</button>
+        </div>
+      </div>
+
+    </div><!-- /modal -->
+  </div><!-- /viewModal -->
+
+  <!-- ════════════════════════════════════════════════════════
+       SETTINGS PANEL
+  ══════════════════════════════════════════════════════════ -->
+  <div class="settings-panel hidden" id="settingsPanel">
+
+    <div class="settings-header">
+      <button class="icon-btn" id="settingsBackBtn" title="Back">←</button>
+      <span class="settings-title">⚙️ Settings</span>
+    </div>
+
+    <div class="settings-body">
+
+      <!-- AI Config -->
+      <div class="settings-section">
+        <div class="settings-section-head">🤖 AI Configuration</div>
+        <div class="field">
+          <label>AI Provider</label>
+          <select id="s-aiProvider">
+            <option value="groq">Groq (Free &amp; Fast)</option>
+            <option value="gemini">Google Gemini (Free)</option>
+            <option value="openai">OpenAI (GPT)</option>
+          </select>
+        </div>
+        <div class="field hidden" id="s-modelField">
+          <label>Model (OpenAI)</label>
+          <select id="s-aiModel">
+            <option value="gpt-3.5-turbo">GPT-3.5 Turbo &mdash; fast &amp; affordable</option>
+            <option value="gpt-4o-mini">GPT-4o Mini &mdash; better quality</option>
+            <option value="gpt-4o">GPT-4o &mdash; best quality</option>
+          </select>
+        </div>
+        <div class="field" id="s-groqModelField">
+          <label>Model (Groq)</label>
+          <select id="s-groqModel">
+            <option value="llama-3.3-70b-versatile">Llama 3.3 70B &mdash; best quality</option>
+            <option value="llama-3.1-8b-instant">Llama 3.1 8B &mdash; fastest</option>
+            <option value="mixtral-8x7b-32768">Mixtral 8x7B &mdash; balanced</option>
+          </select>
+        </div>
+        <div class="field hidden" id="s-geminiModelField">
+          <label>Model (Gemini)</label>
+          <select id="s-geminiModel">
+            <option value="gemini-1.5-flash">Gemini 1.5 Flash &mdash; high free quota</option>
+            <option value="gemini-2.0-flash">Gemini 2.0 Flash &mdash; fast &amp; free</option>
+            <option value="gemini-2.5-flash">Gemini 2.5 Flash &mdash; better quality</option>
+            <option value="gemini-2.5-pro">Gemini 2.5 Pro &mdash; best quality</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>API Key</label>
+          <div class="key-row">
+            <input type="password" id="s-apiKey" placeholder="Paste your API key here…" autocomplete="off" spellcheck="false">
+            <button class="eye-btn" id="s-eyeBtn" title="Show / hide">👁</button>
+          </div>
+          <p class="hint">Stored only on your device — never sent anywhere except the AI provider.</p>
+        </div>
+        <div class="test-row">
+          <button class="btn-outline" id="s-testBtn">Test Connection</button>
+          <div class="test-result hidden" id="s-testResult"></div>
+        </div>
+      </div>
+
+      <!-- Data Management -->
+      <div class="settings-section">
+        <div class="settings-section-head">📊 Data Management</div>
+        <div class="s-stats" id="s-statsBox">Loading…</div>
+        <div class="s-actions">
+          <button class="btn-outline s-action-btn" id="s-exportBtn">📤 Export</button>
+          <button class="btn-outline s-action-btn" id="s-importBtn">📥 Import</button>
+          <input type="file" id="s-importFile" accept=".json" class="hidden">
+          <button class="btn-danger-outline s-action-btn" id="s-clearBtn">🗑️ Clear All</button>
+        </div>
+      </div>
+
+    </div><!-- /settings-body -->
+
+    <div class="settings-footer">
+      <button class="btn-primary" id="s-saveBtn">Save Settings</button>
+      <span class="save-msg hidden" id="s-saveMsg">✅ Saved!</span>
+    </div>
+
+  </div><!-- /settingsPanel -->
+
+  <!-- ── TOAST ─────────────────────────────────────────────── -->
+  <div class="toast hidden" id="toast"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
